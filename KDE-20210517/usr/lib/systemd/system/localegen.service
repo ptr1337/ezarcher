@@ -1,0 +1,9 @@
+[Unit]
+Description=Generate locale on boot.
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/local/bin/localegen.sh
+
+[Install]
+WantedBy=multi-user.target 

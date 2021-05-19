@@ -1,0 +1,56 @@
+# Ezarcher Calamares Installer pkgbuild
+
+pkgname=calamares
+pkgver=3.2.39.3
+_pkgver=3.2.39.3
+pkgrel=7
+pkgdesc='Distribution-independent installer framework'
+arch=('x86_64')
+license=(GPL)
+url="https://github.com/calamares/calamares"
+license=('LGPL')
+depends=('kconfig' 'cmake' 'kcoreaddons' 'kiconthemes' 'ki18n' 'kio' 'solid' 'yaml-cpp' 'kpmcore' 'qt5-webengine' 'kwidgetsaddons' 'icu' 'qt5-location'
+         'boost' 'hwinfo' 'qt5-svg' 'qt5ct' 'polkit-qt5' 'gtk-update-icon-cache' 'plasma-framework' 'qt5-tools' 'networkmanager' 'python' 'parted' 'doxygen'
+         'qt5-xmlpatterns' 'squashfs-tools' 'rsync' 'cryptsetup' 'libpwquality' 'dmidecode' 'gptfdisk' 'kparts' 'kdbusaddons' 'kservice' 'upower')
+makedepends=('extra-cmake-modules' 'qt5-tools' 'qt5-translations' 'git' 'boost')
+
+source=("$pkgname-$pkgver.tar.gz::https://github.com/calamares/calamares/releases/download/v$pkgver/calamares-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+	cd ${srcdir}/calamares-${pkgver}
+	sed -i -e 's/"Install configuration files" OFF/"Install configuration files" ON/' CMakeLists.txt
+
+	# change version
+	sed -i -e "s|$pkgver|$_pkgver|g" CMakeLists.txt
+	_ver="$pkgver"
+	printf 'Version: %s-%s' "${_ver}" "${pkgrel}"
+	sed -i -e "s|\${CALAMARES_VERSION_MAJOR}.\${CALAMARES_VERSION_MINOR}.\${CALAMARES_VERSION_PATCH}|${_ver}-${pkgrel}|g" CMakeLists.txt
+	sed -i -e "s|CALAMARES_VERSION_RC 1|CALAMARES_VERSION_RC 0|g" CMakeLists.txt
+}
+
+build() {
+	cd ${srcdir}/calamares-${pkgver}
+
+	mkdir -p build
+	cd build
+        cmake .. \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_INSTALL_PREFIX=/usr \
+              -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+              -DWITH_PYTHONQT:BOOL=ON \
+              -DWITH_KF5DBus=OFF \
+              -DBoost_NO_BOOST_CMAKE=ON \
+              -DSKIP_MODULES="tracking webview interactiveterminal initramfs \
+                              initramfscfg dracut dracutlukscfg netinstall \
+                              dummyprocess dummypython dummycpp usersq \
+                              dummypythonqt services-openrc keyboardq \
+                              localeq plasmalnf welcomeq notesqml oemid"
+        make
+}
+
+package() {
+	cd ${srcdir}/calamares-${pkgver}/build
+	make DESTDIR="$pkgdir" install
+	install -Dm644 "../calamares.desktop" "$pkgdir/usr/share/applications/calamares.desktop"
+}
