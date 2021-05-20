@@ -1,0 +1,7 @@
+do the changes, then run 
+
+git add .
+
+git commit -m "Description of my changes"
+
+git push origin HEAD
