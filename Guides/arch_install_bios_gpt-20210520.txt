@@ -1,11 +1,11 @@
 
------------------------------------------------------
+---------------------------------------------------
 
-Arch Install - Legacy BIOS System & MBR Partition Layout
+Arch Install - Legacy BIOS System & GPT Partition Layout
 
 Multiple Choice Desktop Example
 
------------------------------------------------------
+---------------------------------------------------
 
 1. Set keyboard layout - default is US
 ** Available layouts can be listed with:
@@ -24,24 +24,26 @@ ping google.com
 timedatectl set-ntp true
 
 5. Sync repositories, Install Reflector and Create mirrorlist, & install latest keyring
+pacman -Sy
 pacman -S archlinux-keyring
 pacman -S --needed reflector
 reflector --latest 10 --protocol https --save /etc/pacman.d/mirrorlist
 
-6. Run cfdisk - BIOS MBR
+6. Run cfdisk - BIOS GPT
 cfdisk /dev/sda
-sda1: swap, sda2: root, sda3: home
+sda1: bios-boot, sda2: swap, sda3: root, sda4: home
+bios-boot: type: bios-boot size: 8Mb
 
 7. Format partitions
-mkfs.ext4 /dev/sda2
 mkfs.ext4 /dev/sda3
-mkswap /dev/sda1
-swapon /dev/sda1
+mkfs.ext4 /dev/sda4
+mkswap /dev/sda2
+swapon /dev/sda2
 
 8. Mount partitions
-mount /dev/sda2 /mnt
+mount /dev/sda3 /mnt
 mkdir /mnt/home
-mount /dev/sda3 /mnt/home
+mount /dev/sda4 /mnt/home
 
 9. Install base packages -- linux-lts for long term support kernel, linux for standard kernel
 pacstrap /mnt base base-devel linux-lts linux-firmware sysfsutils usbutils e2fsprogs dosfstools mtools mkinitcpio inetutils netctl dhcpcd device-mapper cryptsetup nano less lvm2 dialog reflector
@@ -52,7 +54,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 11. Chroot into system
 arch-chroot /mnt
 
-12. Configure timezone --  Example, choose your correct timezone
+12. Configure timezone  --  Example, choose your correct timezone
 rm -rf /etc/localtime
 to list geographic areas:
 ls /usr/share/zoneinfo/
@@ -79,8 +81,8 @@ Add lines:
 127.0.0.1	localhost
 ::1		localhost
 127.0.1.1	myhostname.localdomain myhostname
-
-15. Create root password and user  --  Example, choose your own username
+   
+15. Create root password and user --  Example, choose your own username
 passwd root
 useradd -m -G sys,log,network,floppy,scanner,power,rfkill,users,video,storage,optical,lp,audio,wheel,adm -s /bin/bash username
 passwd username
@@ -160,6 +162,6 @@ umount -a
 reboot
 
 
-arch_install_bios_mbr-20210516.txt
-# Revision: 2021.05.16 -- by eznix (https://sourceforge.net/projects/ezarch/)
+arch_install_bios_gpt-20210520
+# Revision: 2021.05.20 -- by eznix (https://sourceforge.net/projects/ezarch/)
 # (GNU/General Public License version 3.0)
