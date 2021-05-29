@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Move ezmkinit to linux.preset
+mv /etc/mkinitcpio.d/ezmkinit /etc/mkinitcpio.d/linux.preset
